@@ -222,8 +222,8 @@ namespace cg::renderer
 			{
 				for (int y = 0; y < height; y++)
 				{
-					float u = (2.f * jitter.x) / static_cast<float>(width - 1) - 1.f;
-					float v = (2.f * jitter.y) / static_cast<float>(height - 1) - 1.f;
+					float u = (2.f * x +jitter.x) / static_cast<float>(width - 1) - 1.f;
+					float v = (2.f * y + jitter.y) / static_cast<float>(height - 1) - 1.f;
 					u *= static_cast<float>(width)/static_cast<float>(height);
 					float3 ray_direction = direction + u * right - v * up;
 					ray ray(position, ray_direction);
