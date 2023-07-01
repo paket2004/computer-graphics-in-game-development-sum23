@@ -5,7 +5,6 @@
 
 void cg::renderer::rasterization_renderer::init()
 {
-	// Lab: 1.02 Implement image clearing & saving in `cg::renderer::rasterization_renderer` class
 	rasterizer = std::make_shared<cg::renderer::rasterizer<cg::vertex,cg::unsigned_color>>();
 	rasterizer->set_viewport(settings->width,settings->height);
 
@@ -13,10 +12,8 @@ void cg::renderer::rasterization_renderer::init()
 	depth_buffer = std::make_shared<cg::resource<float>>(settings->width,settings->height);
 
 	rasterizer->set_render_target(render_target,depth_buffer);
-	//Lab: 1.03 Adjust `cg::renderer::rasterization_renderer` class to consume `cg::world::model`
 	model = std::make_shared<cg::world::model>();
 	model->load_obj(settings->model_path);
-	//Lab: 1.04 Setup an instance of camera `cg::world::camera` class in `cg::renderer::rasterization_renderer`
 	camera = std::make_shared<cg::world::camera>();
 	camera->set_height(static_cast<float>(settings->height));
 	camera->set_width(static_cast<float>(settings->width));
@@ -32,17 +29,14 @@ void cg::renderer::rasterization_renderer::render()
 {
 	// timer
 	auto start = std::chrono::high_resolution_clock::now();
-	// Lab: 1.02 Implement image clearing & saving in `cg::renderer::rasterization_renderer` class
 
 	rasterizer->clear_render_target({0,0,0});
 	float4x4 matrix = mul(camera->get_projection_matrix(), camera->get_view_matrix(), model->get_world_matrix());
 
-	// Lab: 1.04 Implement `vertex_shader` lambda for the instance of `cg::renderer::rasterizer`
 	rasterizer->vertex_shader = [&](float4 vertex, cg::vertex vertex_data) {
 		auto processed = mul(matrix,vertex);
 		return std::make_pair(processed, vertex_data);
 	};
-	// Lab: 1.05 Implement `pixel_shader` lambda for the instance of `cg::renderer::rasterizer`
 	rasterizer->pixel_shader = [](cg::vertex vertex_data, float z) {
 		return cg::color {vertex_data.ambient_r, vertex_data.ambient_g,vertex_data.ambient_b};
 	};
