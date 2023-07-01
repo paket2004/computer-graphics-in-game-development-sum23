@@ -7,7 +7,6 @@
 
 void cg::renderer::ray_tracing_renderer::init()
 {
-	//Lab: 2.01 Add `render_target`, `camera`, and `raytracer` in `ray_tracing_renderer` class
 	raytracer = std::make_shared<cg::renderer::raytracer<cg::vertex,cg::unsigned_color>>();
 	raytracer->set_viewport(settings->width,settings->height);
 	render_target = std::make_shared<cg::resource<cg::unsigned_color>>(settings->width,settings->height);
@@ -58,7 +57,6 @@ void cg::renderer::ray_tracing_renderer::update() {}
 void cg::renderer::ray_tracing_renderer::render()
 {
 	auto start = std::chrono::high_resolution_clock::now();
-	//Lab: 2.01 Implement `miss_shader`, image clearing, calling `ray_generation`, and saving in `ray_tracing_renderer` class
 	raytracer->clear_render_target({0,0,0});
 	raytracer->build_acceleration_structure();
 	raytracer->miss_shader = [](const ray& ray) {
@@ -89,15 +87,15 @@ void cg::renderer::ray_tracing_renderer::render()
 		cg::renderer::ray to_next_object(position,random_direction);
 		auto payload_next = raytracer->trace_ray(to_next_object,depth);
 		result_color += triangle.diffuse * payload_next.color.to_float3() * std::max(dot(normal,to_next_object.direction),0.f);
-
-//		for (auto& light: lights) {
-//			cg::renderer::ray to_light(position,light.position - position);
-//			auto shadow_payload = shadow_raytracer->trace_ray(to_light,1,length(light.position-position));
-//			if (shadow_payload.t < 0)
-//			{
-//				result_color += triangle.diffuse * light.color * std::max(dot(normal,to_light.direction),0.f);
-//			}
-//		}
+		//comment code below to obtain only rays
+		for (auto& light: lights) {
+			cg::renderer::ray to_light(position,light.position - position);
+			auto shadow_payload = shadow_raytracer->trace_ray(to_light,1,length(light.position-position));
+			if (shadow_payload.t < 0)
+			{
+				result_color += triangle.diffuse * light.color * std::max(dot(normal,to_light.direction),0.f);
+			}
+		}
 		payload.color = cg::color::from_float3(result_color);
 		return payload;
 	};
@@ -127,11 +125,4 @@ void cg::renderer::ray_tracing_renderer::render()
 	std::cout << "Raytracing took: " << duration.count() << " ms\n";
 	cg::utils::save_resource(*render_target, settings->result_path);
 
-
-	// TODO Lab: 2.02 Add `closest_hit_shader` to `raytracer` class to return diffuse color
-	// TODO Lab: 2.03 Adjust `closest_hit_shader` of `raytracer` to implement Lambertian shading model
-	// TODO Lab: 2.04 Define `any_hit_shader` and `miss_shader` for `shadow_raytracer`
-	// TODO Lab: 2.04 Adjust `closest_hit_shader` of `raytracer` to cast shadows rays and to ignore occluded lights
-	// TODO Lab: 2.05 Adjust `ray_tracing_renderer` class to build the acceleration structure
-	// TODO Lab: 2.06 (Bonus) Adjust `closest_hit_shader` for Monte-Carlo light tracing
 }
